@@ -1,0 +1,94 @@
+/* Basic reset and styling to match Adobe's dark/light themes vaguely or just be clean */
+body {
+    background-color: #323232; /* Default dark background */
+    color: #e0e0e0;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 16px;
+    font-size: 12px;
+}
+
+h1 {
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+/* Data Grid / Spreadsheet Styling */
+.spreadsheet-container {
+    margin-bottom: 16px;
+    border: 1px solid #4a4a4a;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #4a4a4a;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #262626;
+    font-weight: bold;
+}
+
+input[type="text"], input[type="number"] {
+    width: 100%;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    color: inherit;
+    padding: 4px;
+}
+
+input:focus {
+    outline: 1px solid #0265DC; /* Adobe blue highlight */
+    background-color: #3a3a3a;
+}
+
+/* Buttons */
+.controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+button {
+    background-color: #464646;
+    color: white;
+    border: 1px solid #202020;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #565656;
+}
+
+button.primary {
+    background-color: #0265DC;
+    border-color: #004cb6;
+}
+
+button.primary:hover {
+    background-color: #005cc8;
+}
+
+.remove-row-btn {
+    background: transparent;
+    border: none;
+    color: #ff5f5f;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0 4px;
+}
+
+.remove-row-btn:hover {
+    color: #ff8585;
+}
