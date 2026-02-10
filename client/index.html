@@ -126,6 +126,85 @@
             opacity: 0;
             cursor: pointer;
         }
+
+        /* Preview Section */
+        .preview-section {
+            margin-top: 15px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #3a3a3a;
+            padding: 4px 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        .preview-toolbar .preview-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .preview-toolbar .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .zoom-btn {
+            background-color: #555;
+            color: #eee;
+            border: 1px solid #444;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+            padding: 0;
+        }
+
+        .zoom-btn:hover {
+            background-color: #777;
+        }
+
+        .zoom-label {
+            color: #ccc;
+            font-size: 11px;
+            min-width: 36px;
+            text-align: center;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .zoom-label:hover {
+            background-color: #555;
+        }
+
+        .preview-container {
+            background-color: #e0e0e0;
+            overflow: auto;
+            max-height: 250px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .preview-container canvas {
+            display: block;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 
@@ -250,11 +329,27 @@ Item C	30</textarea>
         <div class="col"><label>Sufixo</label><input type="text" id="suffixInput"></div>
     </div>
 
+    <!-- PREVIEW -->
+    <div class="preview-section">
+        <div class="preview-toolbar">
+            <span class="preview-title">Preview</span>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+                <span class="zoom-label" id="zoomLabel" title="Clique para resetar">100%</span>
+                <button class="zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
+            </div>
+        </div>
+        <div class="preview-container" id="previewContainer">
+            <canvas id="previewCanvas"></canvas>
+        </div>
+    </div>
+
     <div class="spacer"></div>
     <button id="create-btn" class="primary">CRIAR GRÁFICO</button>
 
     <!-- SCRIPTS -->
     <script src="CSInterface.js"></script>
+    <script src="js/preview.js"></script>
     <script src="js/main.js"></script>
 </body>
 

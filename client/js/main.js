@@ -8,11 +8,34 @@ window.onload = function () {
     document.getElementById("create-btn").addEventListener("click", createChart);
     document.getElementById("chartType").addEventListener("change", updateConfigOptions);
 
+    // Zoom controls
+    document.getElementById("zoomInBtn").addEventListener("click", function () { PreviewEngine.zoomIn(); });
+    document.getElementById("zoomOutBtn").addEventListener("click", function () { PreviewEngine.zoomOut(); });
+    document.getElementById("zoomLabel").addEventListener("click", function () { PreviewEngine.resetZoom(); });
+
+    // Live preview: attach input/change listeners to all config inputs
+    var inputIds = [
+        "inputData", "checkHeader", "chartType", "totalWidthInput",
+        "barThickInput", "barGapInput", "dropLabel", "dropValue",
+        "checkAxisX", "tableRowGapInput",
+        "lblSizeInput", "valSizeInput", "prefixInput", "suffixInput"
+    ];
+
+    inputIds.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("input", function () { PreviewEngine.scheduleRender(); });
+        el.addEventListener("change", function () { PreviewEngine.scheduleRender(); });
+    });
+
     // Poll for selection changes to update button text
     setInterval(checkSelectionState, 1000);
 
     // Initialize config options visibility
     updateConfigOptions();
+
+    // Initialize preview
+    PreviewEngine.init();
 };
 
 function updateConfigOptions() {
@@ -64,6 +87,7 @@ function initPalette() {
         input.onchange = function (e) {
             currentPalette[index] = e.target.value;
             swatch.style.backgroundColor = e.target.value;
+            PreviewEngine.scheduleRender();
         };
 
         wrapper.appendChild(swatch);
@@ -118,8 +142,12 @@ function loadFonts() {
     });
 }
 
-function createChart() {
-    // 1. Parse Data
+/* ============================================================
+   Shared data parsing / config collection
+   Used by both createChart() and PreviewEngine
+   ============================================================ */
+
+function parseInputData() {
     var rawText = document.getElementById("inputData").value;
     var lines = rawText.split("\n");
     var data = [];
@@ -145,7 +173,6 @@ function createChart() {
             for (var j = 1; j < parts.length; j++) {
                 var valStr = parts[j].trim();
                 if (valStr === "") continue;
-                // Handle 1.000,00 format if present, simple cleanup
                 var cleanVal = valStr.replace(/\./g, "").replace(",", ".");
                 var val = parseFloat(cleanVal);
                 if (!isNaN(val)) values.push(val);
@@ -157,26 +184,23 @@ function createChart() {
         }
     }
 
-    if (data.length === 0) {
-        alert("Nenhum dado válido encontrado.");
-        return;
-    }
-
     // Auto-fill legend labels if missing
-    if (legendLabels.length === 0) {
+    if (legendLabels.length === 0 && data.length > 0) {
         var numSeries = data[0].values.length;
         for (var s = 0; s < numSeries; s++) legendLabels.push("Série " + (s + 1));
     }
 
-    // 2. Build Config Object
+    return { data: data, legendLabels: legendLabels };
+}
+
+function getConfig() {
     var chartType = document.getElementById("chartType").value || "bar";
 
-    // For table mode, use tableRowGapInput instead of barGapInput
     var gapValue = (chartType === "table")
         ? parseFloat(document.getElementById("tableRowGapInput").value) || 40
         : parseFloat(document.getElementById("barGapInput").value) || 40;
 
-    var config = {
+    return {
         chartType: chartType,
         totalWidth: parseFloat(document.getElementById("totalWidthInput").value) || 650,
         barThickness: parseFloat(document.getElementById("barThickInput").value) || 30,
@@ -192,18 +216,26 @@ function createChart() {
         suffix: document.getElementById("suffixInput").value,
         showAxisX: document.getElementById("checkAxisX").checked,
         showAxisY: document.getElementById("checkAxisY").checked,
-        hasHeader: hasHeader,
-        legendLabels: legendLabels,
-        data: data
+        hasHeader: document.getElementById("checkHeader").checked
     };
+}
 
-    // 3. Send to Host
-    // We must escape backslashes in the JSON string for EvalScript
+function createChart() {
+    var parsed = parseInputData();
+    var data = parsed.data;
+    var legendLabels = parsed.legendLabels;
+
+    if (data.length === 0) {
+        alert("Nenhum dado válido encontrado.");
+        return;
+    }
+
+    var config = getConfig();
+    config.legendLabels = legendLabels;
+    config.data = data;
+
+    // Send to Host
     var jsonStr = JSON.stringify(config);
-    // Replace double quote with single quote hack if needed, or just pass correctly.
-    // EvalScript takes a string. If we pass a JSON string, we need to be careful.
-    // Easiest is to wrap in single quotes and escape existing single quotes.
-
     var scriptCall = "initGraphMaker('" + jsonStr.replace(/'/g, "\\'") + "')";
 
     csInterface.evalScript(scriptCall, function (res) {
